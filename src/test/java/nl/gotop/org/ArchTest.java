@@ -1,0 +1,29 @@
+package nl.gotop.org;
+
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.core.importer.ImportOption;
+import org.junit.jupiter.api.Test;
+
+class ArchTest {
+
+    @Test
+    void servicesAndRepositoriesShouldNotDependOnWebLayer() {
+        JavaClasses importedClasses = new ClassFileImporter()
+            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
+            .importPackages("nl.gotop.org");
+
+        noClasses()
+            .that()
+            .resideInAnyPackage("nl.gotop.org.service..")
+            .or()
+            .resideInAnyPackage("nl.gotop.org.repository..")
+            .should()
+            .dependOnClassesThat()
+            .resideInAnyPackage("..nl.gotop.org.web..")
+            .because("Services and repositories should not depend on web layer")
+            .check(importedClasses);
+    }
+}
